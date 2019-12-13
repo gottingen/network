@@ -4,7 +4,7 @@ package tcp
 import (
 	"context"
 	"errors"
-	"github.com/gottingen/network/util"
+	"github.com/gottingen/network/timer"
 	"net"
 	"strconv"
 	"sync"
@@ -308,14 +308,14 @@ func tryDial(network string, addr *net.TCPAddr, deadline time.Time, concurrencyC
 		select {
 		case concurrencyCh <- struct{}{}:
 		default:
-			tc := util.AcquireTimer(timeout)
+			tc := timer.AcquireTimer(timeout)
 			isTimeout := false
 			select {
 			case concurrencyCh <- struct{}{}:
 			case <-tc.C:
 				isTimeout = true
 			}
-			util.ReleaseTimer(tc)
+			timer.ReleaseTimer(tc)
 			if isTimeout {
 				return nil, ErrDialTimeout
 			}
@@ -341,7 +341,7 @@ func tryDial(network string, addr *net.TCPAddr, deadline time.Time, concurrencyC
 		err  error
 	)
 
-	tc := util.AcquireTimer(timeout)
+	tc := timer.AcquireTimer(timeout)
 	select {
 	case dr := <-ch:
 		conn = dr.conn
@@ -350,7 +350,7 @@ func tryDial(network string, addr *net.TCPAddr, deadline time.Time, concurrencyC
 	case <-tc.C:
 		err = ErrDialTimeout
 	}
-	util.ReleaseTimer(tc)
+	timer.ReleaseTimer(tc)
 
 	return conn, err
 }
