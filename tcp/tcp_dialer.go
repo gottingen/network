@@ -12,6 +12,9 @@ import (
 	"time"
 )
 
+const (
+	DefaultDialTimeout = 3 * time.Second
+)
 // Dial dials the given TCP addr using tcp4.
 //
 // This function has the following additional features comparing to net.Dial:
